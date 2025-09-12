@@ -1,20 +1,59 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View, StyleSheet, ScrollView, } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import Sortable from 'react-native-sortables';
 
-export default function App() {
+const DATA = [
+  'Poland',
+  'Germany',
+  'France',
+  'Italy',
+  'Spain',
+  'Portugal',
+  'Greece',
+  'Great Britain',
+  'United States',
+  'Canada',
+  'Australia',
+  'New Zealand'
+];
+
+export default function Flex() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaProvider>
+      <GestureHandlerRootView>
+        <SafeAreaView>
+          <ScrollView contentContainerStyle={styles.container} style={styles.container}>
+            <Sortable.Flex gap={16} padding={8} alignItems="center" width="fill" strategy="insert">
+              {DATA.map(item => (
+                <View style={styles.cell} key={item}>
+                  <Text style={styles.text}>{item}</Text>
+                </View>
+              ))}
+            </Sortable.Flex>
+          </ScrollView>
+        </SafeAreaView>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: "100%"
   },
+  cell: {
+    backgroundColor: '#86b7aF',
+    borderRadius: 9999,
+    margin: "auto",
+    height: 96,
+    minWidth: 128,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  text: {
+    fontSize: 16,
+    fontWeight: "bold"
+  }
 });
