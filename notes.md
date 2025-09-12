@@ -1,0 +1,2 @@
+- Position is relative to the Sortable.Flex container
+- The callback returns indexToKey

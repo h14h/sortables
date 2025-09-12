@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Get the next open item from todos.md
+next_open=$(grep -m 1 "^o " todos.md)
+
+if [ -n "$next_open" ]; then
+    echo "$next_open"
+else
+    echo "No open items found in todos.md"
+fi

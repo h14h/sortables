@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Check if todos.md exists, create if it doesn't
+if [ ! -f "todos.md" ]; then
+    touch todos.md
+fi
+
+# Check if any arguments were provided
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <todo item>"
+    echo "Example: $0 Buy groceries and pick up dry cleaning"
+    exit 1
+fi
+
+# Join all arguments into a single string
+todo_item="$*"
+
+# Create temporary file
+temp_file=$(mktemp)
+
+# Add the new todo item to the top of the temp file
+echo "- $todo_item" > "$temp_file"
+
+# Append existing todos.md content to temp file
+if [ -s "todos.md" ]; then
+    cat todos.md >> "$temp_file"
+fi
+
+# Replace todos.md with temp file
+mv "$temp_file" todos.md
+
+echo "Added todo: $todo_item"

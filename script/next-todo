@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# First, find and print the next open todo that will be marked as done
+next_open=$(grep -m 1 "^o " todos.md 2>/dev/null)
+all_done="You've completed all of your open todos 🎉"
+
+if [ -n "$next_open" ]; then
+    echo "Completing: $next_open"
+
+    # Create a flag to track if we've made the replacement
+    temp_file=$(mktemp)
+    replaced=false
+
+    # Process file line by line to replace only the first "o " with "X "
+    while IFS= read -r line; do
+        if [[ "$line" == "o "* && "$replaced" == false ]]; then
+            echo "X ${line:2}" >> "$temp_file"
+            replaced=true
+        else
+            echo "$line" >> "$temp_file"
+        fi
+    done < todos.md
+
+    # Replace the original file
+    mv "$temp_file" todos.md
+
+    echo "✓ Done!"
+
+    # Print the next open todo if one exists
+    next_remaining=$(grep -m 1 "^o " todos.md 2>/dev/null)
+    if [ -n "$next_remaining" ]; then
+        echo ""
+        echo "Next open todo:"
+        echo "$next_remaining"
+    else
+        echo ""
+        echo "$all_done"
+    fi
+else
+    echo "$all_done"
+fi

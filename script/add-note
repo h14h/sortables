@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Check if notes.md exists, create if it doesn't
+if [ ! -f "notes.md" ]; then
+    touch notes.md
+fi
+
+# Check if any arguments were provided
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <note>"
+    echo "Example: $0 Remember to check the API documentation"
+    exit 1
+fi
+
+# Join all arguments into a single string
+note="$*"
+
+# Append the note to the bottom of notes.md with "- " prefix
+echo "- $note" >> notes.md
+
+echo "Added note: $note"

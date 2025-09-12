@@ -6,7 +6,12 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "note": "./script/add-note",
+    "next": "./script/next-todo",
+    "now": "./script/read-todo",
+    "plan": "./script/review-todos",
+    "todo": "./script/add-todo"
   },
   "dependencies": {
     "expo": "~54.0.2",

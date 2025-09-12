@@ -1,0 +1,82 @@
+#!/bin/bash
+
+# Read all lines from todos.md into an array
+lines=()
+while IFS= read -r line; do
+    lines+=("$line")
+done < todos.md
+
+# Initialize variables
+current_line=0
+total_lines=0
+for line in "${lines[@]}"; do
+    if [[ ! "$line" == x* && ! "$line" == X* ]]; then
+        ((total_lines++))
+    fi
+done
+
+# Function to display current item
+display_item() {
+    clear
+    echo "Todo Item $(($current_line + 1)) of $total_lines:"
+    echo "${lines[$current_line]}"
+    echo ""
+    echo "Commands: (n)ext, mark as (o)pen, mark as done (x)"
+}
+
+# Function to skip items prefixed with 'x ' or 'X '
+skip_completed() {
+    while [[ $current_line -lt $total_lines && ("${lines[$current_line]}" == x* || "${lines[$current_line]}" == X*) ]]; do
+        ((current_line++))
+    done
+}
+
+# Skip any initial completed items
+skip_completed
+
+# Main loop
+while [[ $current_line -lt $total_lines ]]; do
+    display_item
+
+    # Read single character input
+    read -n 1 -s key
+
+    case $key in
+        'n')
+            ((current_line++))
+            skip_completed
+            ;;
+        'o')
+            if [[ "${lines[$current_line]}" == "- "* ]]; then
+                lines[$current_line]="o ${lines[$current_line]:2}"
+                # Write back to file
+                printf '%s\n' "${lines[@]}" > todos.md
+                # Move to next item and skip completed ones
+                ((current_line++))
+                skip_completed
+            fi
+            ;;
+        'x')
+            if [[ "${lines[$current_line]}" == "- "* ]]; then
+                # Unstarted item -> lowercase "x "
+                lines[$current_line]="x ${lines[$current_line]:2}"
+                # Write back to file
+                printf '%s\n' "${lines[@]}" > todos.md
+                # Move to next item and skip completed ones
+                ((current_line++))
+                skip_completed
+            elif [[ "${lines[$current_line]}" == "o "* ]]; then
+                # Open item -> uppercase "X "
+                lines[$current_line]="X ${lines[$current_line]:2}"
+                # Write back to file
+                printf '%s\n' "${lines[@]}" > todos.md
+                # Move to next item and skip completed ones
+                ((current_line++))
+                skip_completed
+            fi
+            ;;
+    esac
+done
+
+clear
+echo "All todo items processed!"
