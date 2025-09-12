@@ -102,7 +102,6 @@ const ELEMENT_HEIGHT = 100;
 const GAP_SIZE = 12;
 const MARKER_WIDTH = GAP_SIZE * 3;
 
-// TODO: Calculate this on every render
 const ITEM_WIDTH =
   (Dimensions.get("window").width - GAP_SIZE * 5 - MARKER_WIDTH) / 3;
 
