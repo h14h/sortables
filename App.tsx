@@ -1,10 +1,10 @@
-import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Dimensions, StyleSheet, Text, View } from "react-native";
+import {
+  GestureHandlerRootView,
+  ScrollView,
+} from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import Sortable, {
-  type SortStrategyFactory,
-  useCommonValuesContext,
-} from "react-native-sortables";
+import Sortable from "react-native-sortables";
 
 const DATA: [string, string[]][] = [
   ["🇺🇸", ["New York", "Los Angeles", "Chicago"]],
@@ -24,30 +24,6 @@ const DATA: [string, string[]][] = [
   ["🇸🇪", ["Stockholm", "Gothenburg", "Malmö"]],
 ];
 
-const customFlexStrategy: SortStrategyFactory = () => {
-  const {
-    activeItemKey: _activeItemKey,
-    indexToKey,
-    itemHeights: _itemHeights,
-    itemWidths: _itemWidths,
-    keyToIndex,
-  } = useCommonValuesContext();
-
-  console.log("keyToIndex", JSON.stringify(keyToIndex, null, 2));
-
-  return ({ activeIndex: i, activeKey: key, dimensions, position }) => {
-    "worklet";
-    const w = Math.trunc(dimensions.width);
-    const h = Math.trunc(dimensions.height);
-    const x = Math.trunc(position.x);
-    const y = Math.trunc(position.y);
-
-    console.log(`[${i}]${key} ${w}x${h}@${x},${y}`);
-
-    return indexToKey.value;
-  };
-};
-
 export default function Flex() {
   return (
     <SafeAreaProvider>
@@ -62,7 +38,7 @@ export default function Flex() {
               padding={GAP_SIZE}
               alignItems="center"
               width="fill"
-              strategy={customFlexStrategy}
+              strategy="insert"
             >
               {DATA.map(([country, cities]) => (
                 <>
