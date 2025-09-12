@@ -1,3 +1,5 @@
+X Fix counting bug with script/review-todos
+o Fix drag conflicts with scrolling
 X Set up biome
 o Reorder items within a group
 o Get item width on every render
