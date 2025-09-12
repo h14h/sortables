@@ -1,7 +1,7 @@
 import { Text, View, StyleSheet, ScrollView, } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import Sortable from 'react-native-sortables';
+import Sortable, { SortStrategyFactory } from 'react-native-sortables';
 
 const DATA = [
   'Poland',
@@ -18,13 +18,19 @@ const DATA = [
   'New Zealand'
 ];
 
+const customFlexStrategy: SortStrategyFactory = () => (params) => {
+  console.log(JSON.stringify(params, null, 2))
+
+  return []
+}
+
 export default function Flex() {
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView>
         <SafeAreaView>
           <ScrollView contentContainerStyle={styles.container} style={styles.container}>
-            <Sortable.Flex gap={16} padding={8} alignItems="center" width="fill" strategy="insert">
+            <Sortable.Flex gap={16} padding={8} alignItems="center" width="fill" strategy={customFlexStrategy}>
               {DATA.map(item => (
                 <View style={styles.cell} key={item}>
                   <Text style={styles.text}>{item}</Text>
