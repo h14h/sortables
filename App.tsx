@@ -19,6 +19,7 @@ const DATA = [
 ];
 
 const customFlexStrategy: SortStrategyFactory = () => (params) => {
+  'worklet';
   console.log(JSON.stringify(params, null, 2))
 
   return []
