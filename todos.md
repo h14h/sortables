@@ -3,4 +3,4 @@
 - List discrete features to implement
 - Drag multiple items at once
 X Set up todo tracking
-o Add markers and items
+X Add markers and items
