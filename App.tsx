@@ -2,7 +2,7 @@ import { Dimensions, ScrollView, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import Sortable, {
-  SortStrategyFactory,
+  type SortStrategyFactory,
   useCommonValuesContext,
 } from "react-native-sortables";
 

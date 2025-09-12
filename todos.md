@@ -1,3 +1,4 @@
+X Set up biome
 o Reorder items within a group
 o Get item width on every render
 - Estimate how long it will take me to finish implementing this thing
