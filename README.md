@@ -9,3 +9,7 @@ The goal is to support the following:
 - [ ] Reordering entire rows at once (2pt)
 - [ ] Removing items from a row into a new row (2pt)
 - [ ] Moving standalone items into an "open" row (3pt)
+
+> [!NOTE]
+> The above estimates do not include time spent on initial prototype setup and
+  learning the RN Sortables custom ordering strategy API
