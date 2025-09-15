@@ -1,0 +1,11 @@
+# Sortable Rows
+
+This repo is an attempt to create a custom `Sortable.Flex` strategy for
+ordering items across rows.
+
+The goal is to support the following:
+
+- [x] Reordering items within their row (1pt)
+- [ ] Reordering entire rows at once (2pt)
+- [ ] Removing items from a row into a new row (2pt)
+- [ ] Moving standalone items into an "open" row (3pt)
