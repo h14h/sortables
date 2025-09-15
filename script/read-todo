@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Get the next open item from todos.md
-next_open=$(grep -m 1 "^o " todos.md)
+# Get the next open item from todos.txt
+next_open=$(grep -m 1 "^o " todos.txt)
 
 if [ -n "$next_open" ]; then
     # Strip the 'o ' prefix and display stylistically
@@ -9,5 +9,5 @@ if [ -n "$next_open" ]; then
     echo ""
     echo "📋 $todo_item"
 else
-    echo "No open items found in todos.md"
+    echo "No open items found in todos.txt"
 fi

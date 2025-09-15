@@ -1,3 +1,4 @@
+X Move todos from .md to .txt
 - Prevent new items in full rows
 - Reorder rows when dragging marker
 - Destroy old marker on group

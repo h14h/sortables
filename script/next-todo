@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # First, find and print the next open todo that will be marked as done
-next_open=$(grep -m 1 "^o " todos.md 2>/dev/null)
+next_open=$(grep -m 1 "^o " todos.txt 2>/dev/null)
 all_done="You've completed all of your open todos 🎉"
 
 if [ -n "$next_open" ]; then
@@ -19,15 +19,15 @@ if [ -n "$next_open" ]; then
         else
             echo "$line" >> "$temp_file"
         fi
-    done < todos.md
+    done < todos.txt
 
     # Replace the original file
-    mv "$temp_file" todos.md
+    mv "$temp_file" todos.txt
 
     echo "✓ Done!"
 
     # Print the next open todo if one exists
-    next_remaining=$(grep -m 1 "^o " todos.md 2>/dev/null)
+    next_remaining=$(grep -m 1 "^o " todos.txt 2>/dev/null)
     if [ -n "$next_remaining" ]; then
         echo ""
         echo "Next open todo:"

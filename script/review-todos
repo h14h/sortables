@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Read all lines from todos.md into an array
+# Read all lines from todos.txt into an array
 lines=()
 while IFS= read -r line; do
     lines+=("$line")
-done < todos.md
+done < todos.txt
 
 # Initialize variables
 current_line=0
@@ -28,7 +28,7 @@ display_item() {
 
 # Function to skip items prefixed with 'x ' or 'X '
 skip_completed() {
-    while [[ $current_todo -lt $total_todos && ("${lines[$current_line]}" == x* || "${lines[$current_line]}" == X*) ]]; do
+    while [[ $current_todo -le $total_todos && ("${lines[$current_line]}" == x* || "${lines[$current_line]}" == X*) ]]; do
         ((current_line++))
     done
 }
@@ -53,7 +53,7 @@ while [[ $current_todo -le $total_todos ]]; do
             if [[ "${lines[$current_line]}" == "- "* ]]; then
                 lines[$current_line]="o ${lines[$current_line]:2}"
                 # Write back to file
-                printf '%s\n' "${lines[@]}" > todos.md
+                printf '%s\n' "${lines[@]}" > todos.txt
                 # Move to next item and skip completed ones
                 ((current_line++))
                 ((current_todo++))
@@ -65,7 +65,7 @@ while [[ $current_todo -le $total_todos ]]; do
                 # Unstarted item -> lowercase "x "
                 lines[$current_line]="x ${lines[$current_line]:2}"
                 # Write back to file
-                printf '%s\n' "${lines[@]}" > todos.md
+                printf '%s\n' "${lines[@]}" > todos.txt
                 # Move to next item and skip completed ones
                 ((current_line++))
                 ((current_todo++))
@@ -74,7 +74,7 @@ while [[ $current_todo -le $total_todos ]]; do
                 # Open item -> uppercase "X "
                 lines[$current_line]="X ${lines[$current_line]:2}"
                 # Write back to file
-                printf '%s\n' "${lines[@]}" > todos.md
+                printf '%s\n' "${lines[@]}" > todos.txt
                 # Move to next item and skip completed ones
                 ((current_line++))
                 ((current_todo++))
