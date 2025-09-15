@@ -4,7 +4,10 @@
 next_open=$(grep -m 1 "^o " todos.md)
 
 if [ -n "$next_open" ]; then
-    echo "$next_open"
+    # Strip the 'o ' prefix and display stylistically
+    todo_item="${next_open#o }"
+    echo ""
+    echo "📋 $todo_item"
 else
     echo "No open items found in todos.md"
 fi
