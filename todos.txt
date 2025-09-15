@@ -6,7 +6,7 @@ X Move todos from .md to .txt
 - Destroy old marker on group
 - Insert new marker on ungroup
 - Move item into group
-- Implement calculation for Y offset
+o Implement calculation for Y offset
 X Create PR to remove extraneous log in sortables library
 X Bump sortables package version for bugfix
 - Move item out of group
@@ -19,6 +19,6 @@ x Get item width on every render
 X Estimate how long it will take me to finish implementing this thing
 x Get a sense of how long it takes me to implement some unit of work
 X List discrete features to implement
-- Drag multiple items at once
+o Drag multiple items at once
 X Set up todo tracking
 X Add markers and items
