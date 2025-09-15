@@ -1,5 +1,6 @@
+o Bump sortables package version for bugfix
 - Move item out of group
-o Check in on scrolling drag conflict bug report
+X Check in on scrolling drag conflict bug report
 X Fix counting bug with script/review-todos
 X Fix drag conflicts with scrolling
 X Set up biome
