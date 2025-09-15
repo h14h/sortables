@@ -1,4 +1,5 @@
-- Calculate item width during the render based on row size
+- Ensure item width animates during entering/exiting row
+X Calculate item width during the render based on row size
 X Move todos from .md to .txt
 - Prevent new items in full rows
 - Reorder rows when dragging marker

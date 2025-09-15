@@ -78,10 +78,27 @@ export const customFlexStrategy: SortStrategyFactory = () => {
 
 export const ELEMENT_HEIGHT = 100;
 export const GAP_SIZE = 12;
+export const PADDING_SIZE = GAP_SIZE;
 export const MARKER_WIDTH = GAP_SIZE * 3;
 
-export const ITEM_WIDTH =
-  (Dimensions.get("window").width - GAP_SIZE * 5 - MARKER_WIDTH) / 3;
+const MAX_ITEMS = 3;
+export const getItemWidth = (itemCount: number) => {
+  if (itemCount < 0) console.error("There cannot be negative Items in a Row");
+
+  if (itemCount === 0)
+    console.error("There must be at least one Item in a Row");
+
+  if (itemCount > MAX_ITEMS)
+    console.error(`There cannot be more than ${MAX_ITEMS} in a Row`);
+
+  return (
+    (Dimensions.get("window").width -
+      MARKER_WIDTH -
+      PADDING_SIZE * 2 -
+      GAP_SIZE * itemCount) /
+    itemCount
+  );
+};
 
 const MARKER_PREFIX = ".$";
 const ITEM_PREFIX = ".1:$";

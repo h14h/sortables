@@ -6,26 +6,26 @@ import {
   customFlexStrategy,
   ELEMENT_HEIGHT,
   GAP_SIZE,
-  ITEM_WIDTH,
+  getItemWidth,
   MARKER_WIDTH,
 } from "./strategy";
 
 const DATA: [string, string[]][] = [
   ["🇺🇸", ["New York", "Los Angeles", "Chicago"]],
-  ["🇫🇷", ["Paris", "Lyon", "Marseille"]],
-  ["🇯🇵", ["Tokyo", "Osaka", "Kyoto"]],
+  ["🇫🇷", ["Paris", "Nice"]],
+  ["🇯🇵", ["Tokyo"]],
   ["🇬🇧", ["London", "Manchester", "Birmingham"]],
-  ["🇩🇪", ["Berlin", "Munich", "Hamburg"]],
-  ["🇮🇹", ["Rome", "Milan", "Naples"]],
-  ["🇪🇸", ["Madrid", "Barcelona", "Valencia"]],
+  ["🇩🇪", ["Berlin", "Munich"]],
+  ["🇮🇹", ["Rome"]],
+  ["🇪🇸", ["Madrid", "Barcelona"]],
   ["🇨🇦", ["Toronto", "Vancouver", "Montreal"]],
   ["🇦🇺", ["Sydney", "Melbourne", "Brisbane"]],
-  ["🇧🇷", ["São Paulo", "Rio de Janeiro", "Salvador"]],
-  ["🇲🇽", ["Mexico City", "Guadalajara", "Monterrey"]],
-  ["🇮🇳", ["Mumbai", "Delhi", "Bangalore"]],
+  ["🇧🇷", ["São Paulo", "Salvador"]],
+  ["🇲🇽", ["Mexico City"]],
+  ["🇮🇳", ["Mumbai", "Delhi"]],
   ["🇰🇷", ["Seoul", "Busan", "Incheon"]],
-  ["🇳🇱", ["Amsterdam", "Rotterdam", "The Hague"]],
-  ["🇸🇪", ["Stockholm", "Gothenburg", "Malmö"]],
+  ["🇳🇱", ["Amsterdam"]],
+  ["🇸🇪", ["Stockholm", "Gothenburg"]],
 ];
 
 export default function Flex() {
@@ -48,7 +48,11 @@ export default function Flex() {
                 <>
                   <Marker key={`marker${country}`} label={country} />
                   {cities.map((city) => (
-                    <Item key={`item${city}`} label={city} />
+                    <Item
+                      key={`item${city}`}
+                      label={city}
+                      width={getItemWidth(cities.length)}
+                    />
                   ))}
                 </>
               ))}
@@ -60,9 +64,9 @@ export default function Flex() {
   );
 }
 
-const Item = ({ label }: { label: string }) => {
+const Item = ({ label, width }: { label: string; width: number }) => {
   return (
-    <View style={[styles.element, styles.item]}>
+    <View style={[styles.element, styles.item, { width }]}>
       <Text style={styles.text} numberOfLines={1} ellipsizeMode="tail">
         {label}
       </Text>
@@ -88,7 +92,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  item: { backgroundColor: "#86b7aF", width: ITEM_WIDTH },
+  item: { backgroundColor: "#86b7aF" },
   marker: { backgroundColor: "#bababa", width: MARKER_WIDTH },
   text: {
     fontSize: 16,
