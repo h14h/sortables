@@ -113,23 +113,6 @@ const isItem = (key: string) => {
   return key.startsWith(ITEM_PREFIX);
 };
 
-const getSiblingKeys = (
-  index: number,
-  indexToKey: string[],
-  direction: DirectionX,
-) => {
-  "worklet";
-
-  const siblings = [];
-
-  for (let i = index + direction; i >= 0; i += direction) {
-    if (indexToKey[i].startsWith(".$marker")) break;
-    siblings.push(indexToKey[i]);
-  }
-
-  return siblings;
-};
-
 const getOriginX = (
   itemKey: string,
   itemIndex: number,
@@ -138,7 +121,7 @@ const getOriginX = (
 ): number => {
   "worklet";
 
-  if (isMarker(itemKey)) return GAP_SIZE; // Left Padding
+  if (isMarker(itemKey)) return PADDING_SIZE; // Left Padding
 
   const currentItemWidth = itemWidths[itemKey];
 
@@ -150,7 +133,7 @@ const getOriginX = (
   const siblingsWidth = siblingWidths.reduce((sum, width) => sum + width, 0);
 
   return (
-    GAP_SIZE + // Left Padding
+    PADDING_SIZE + // Left Padding
     MARKER_WIDTH + // Width of row marker
     GAP_SIZE + // Gap after row marker
     GAP_SIZE * siblingCount + // Gap after each left sibling
@@ -159,7 +142,7 @@ const getOriginX = (
   );
 };
 
-const getSiblings = (
+const getSiblingKeys = (
   index: number,
   indexToKey: string[],
   direction: Left | Right,
@@ -170,7 +153,7 @@ const getSiblings = (
 
   const inBounds = (i: number) => i >= 0 && i < indexToKey.length;
   for (let i = index + direction; inBounds(i); i += direction) {
-    if (indexToKey[i].startsWith(".$marker")) break;
+    if (isMarker(indexToKey[i])) break;
     siblings.push(indexToKey[i]);
   }
 
@@ -192,7 +175,7 @@ const shouldSwap = (
   const isPastThreshold = Math.abs(offsetX) > swapThreshold;
   if (!isPastThreshold) return false;
 
-  return getSiblings(index, indexToKey, direction).length > 0;
+  return getSiblingKeys(index, indexToKey, direction).length > 0;
 };
 
 const getSwapped = (
