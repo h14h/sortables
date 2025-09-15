@@ -1,4 +1,4 @@
-- Create PR to remove extraneous log in sortables library
+X Create PR to remove extraneous log in sortables library
 X Bump sortables package version for bugfix
 - Move item out of group
 X Check in on scrolling drag conflict bug report
