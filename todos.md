@@ -5,8 +5,8 @@ X Check in on scrolling drag conflict bug report
 X Fix counting bug with script/review-todos
 X Fix drag conflicts with scrolling
 X Set up biome
-o Reorder items within a group
-- Get item width on every render
+X Reorder items within a group
+x Get item width on every render
 o Estimate how long it will take me to finish implementing this thing
 x Get a sense of how long it takes me to implement some unit of work
 o List discrete features to implement
