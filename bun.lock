@@ -12,7 +12,7 @@
         "react-native-gesture-handler": "~2.28.0",
         "react-native-reanimated": "~4.1.0",
         "react-native-safe-area-context": "~5.6.0",
-        "react-native-sortables": "^1.8.0",
+        "react-native-sortables": "^1.9.1",
         "react-native-worklets": "0.5.1",
       },
       "devDependencies": {
@@ -924,7 +924,7 @@
 
     "react-native-safe-area-context": ["react-native-safe-area-context@5.6.1", "", { "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-/wJE58HLEAkATzhhX1xSr+fostLsK8Q97EfpfMDKo8jlOc1QKESSX/FQrhk7HhQH/2uSaox4Y86sNaI02kteiA=="],
 
-    "react-native-sortables": ["react-native-sortables@1.8.0", "", { "optionalDependencies": { "react-native-haptic-feedback": ">=2.0.0" }, "peerDependencies": { "react": "*", "react-native": "*", "react-native-gesture-handler": ">=2.0.0", "react-native-reanimated": ">=3.0.0" } }, "sha512-uoNY0uiHikq3eKJoF85CATMPpo9jS7t37XUlunxSGjjbGi4L05os8eJBGNZSR+3NQgK2FtYGGkQtFbeSJIwmDg=="],
+    "react-native-sortables": ["react-native-sortables@1.9.1", "", { "optionalDependencies": { "react-native-haptic-feedback": ">=2.0.0" }, "peerDependencies": { "react": "*", "react-native": "*", "react-native-gesture-handler": ">=2.0.0", "react-native-reanimated": ">=3.0.0" } }, "sha512-mu2yj/YKax/FutkaRRDGQ7zXwkFHEg9rxsVP4e0aVc7Vu5xUgd2PL4LnOB6PUU5q6OSfqDOoCmMfdmBM4MjN3A=="],
 
     "react-native-worklets": ["react-native-worklets@0.5.1", "", { "dependencies": { "@babel/plugin-transform-arrow-functions": "^7.0.0-0", "@babel/plugin-transform-class-properties": "^7.0.0-0", "@babel/plugin-transform-classes": "^7.0.0-0", "@babel/plugin-transform-nullish-coalescing-operator": "^7.0.0-0", "@babel/plugin-transform-optional-chaining": "^7.0.0-0", "@babel/plugin-transform-shorthand-properties": "^7.0.0-0", "@babel/plugin-transform-template-literals": "^7.0.0-0", "@babel/plugin-transform-unicode-regex": "^7.0.0-0", "@babel/preset-typescript": "^7.16.7", "convert-source-map": "^2.0.0", "semver": "7.7.2" }, "peerDependencies": { "@babel/core": "^7.0.0-0", "react": "*", "react-native": "*" } }, "sha512-lJG6Uk9YuojjEX/tQrCbcbmpdLCSFxDK1rJlkDhgqkVi1KZzG7cdcBFQRqyNOOzR9Y0CXNuldmtWTGOyM0k0+w=="],
 
