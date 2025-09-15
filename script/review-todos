@@ -28,7 +28,7 @@ display_item() {
 
 # Function to skip items prefixed with 'x ' or 'X '
 skip_completed() {
-    while [[ $current_line -lt $total_todos && ("${lines[$current_line]}" == x* || "${lines[$current_line]}" == X*) ]]; do
+    while [[ $current_todo -lt $total_todos && ("${lines[$current_line]}" == x* || "${lines[$current_line]}" == X*) ]]; do
         ((current_line++))
     done
 }
