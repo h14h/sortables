@@ -113,6 +113,24 @@ const isItem = (key: string) => {
   return key.startsWith(ITEM_PREFIX);
 };
 
+const getSiblingKeys = (
+  index: number,
+  indexToKey: string[],
+  direction: Left | Right,
+) => {
+  "worklet";
+
+  const siblings = [];
+
+  const inBounds = (i: number) => i >= 0 && i < indexToKey.length;
+  for (let i = index + direction; inBounds(i); i += direction) {
+    if (isMarker(indexToKey[i])) break;
+    siblings.push(indexToKey[i]);
+  }
+
+  return siblings;
+};
+
 const getOriginX = (
   itemKey: string,
   itemIndex: number,
@@ -141,25 +159,6 @@ const getOriginX = (
     currentItemWidth / 2 // Distance to center of dragged item
   );
 };
-
-const getSiblingKeys = (
-  index: number,
-  indexToKey: string[],
-  direction: Left | Right,
-) => {
-  "worklet";
-
-  const siblings = [];
-
-  const inBounds = (i: number) => i >= 0 && i < indexToKey.length;
-  for (let i = index + direction; inBounds(i); i += direction) {
-    if (isMarker(indexToKey[i])) break;
-    siblings.push(indexToKey[i]);
-  }
-
-  return siblings;
-};
-
 const shouldSwap = (
   index: number,
   indexToKey: string[],
