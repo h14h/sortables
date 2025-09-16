@@ -6,7 +6,7 @@ X Move todos from .md to .txt
 - Destroy old marker on group
 - Insert new marker on ungroup
 - Move item into group
-o Implement calculation for Y offset
+X Implement calculation for Y offset
 X Create PR to remove extraneous log in sortables library
 X Bump sortables package version for bugfix
 - Move item out of group

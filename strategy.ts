@@ -31,16 +31,20 @@ type Direction = {
 };
 
 export const customFlexStrategy: SortStrategyFactory = () => {
-  const { indexToKey, itemWidths } = useCommonValuesContext();
+  const { indexToKey, itemHeights, itemWidths } = useCommonValuesContext();
 
   return ({ activeIndex, activeKey, position }) => {
     "worklet";
 
     const currentIndexToKey = indexToKey.get();
     const currentItemWidths = itemWidths.get();
+    const currentItemHeights = itemHeights.get();
 
     if (!currentItemWidths) return currentIndexToKey;
     if (typeof currentItemWidths === "number") return currentIndexToKey;
+
+    if (!currentItemHeights) return currentIndexToKey;
+    if (typeof currentItemHeights === "number") return currentIndexToKey;
 
     const originX = getOriginX(
       activeKey,
@@ -49,9 +53,15 @@ export const customFlexStrategy: SortStrategyFactory = () => {
       currentItemWidths,
     );
 
+    const originY = getOriginY(
+      activeIndex,
+      currentIndexToKey,
+      currentItemHeights,
+    );
+
     const offset: Offset = {
       x: position.x - originX,
-      y: 0, // TODO
+      y: position.y - originY,
     };
 
     const direction: Direction = {
@@ -159,6 +169,35 @@ const getOriginX = (
     currentItemWidth / 2 // Distance to center of dragged item
   );
 };
+
+const getOriginY = (
+  itemIndex: number,
+  indexToKey: string[],
+  itemHeights: Record<string, number>,
+): number => {
+  "worklet";
+
+  const currentItemHeight = itemHeights[indexToKey[itemIndex]];
+
+  const precedingMarkerKeys = indexToKey
+    .slice(0, itemIndex + 1)
+    .filter(isMarker)
+    .slice(0, -1);
+
+  const precedingRowCount = precedingMarkerKeys.length;
+  const totalPrecedingRowHeight = precedingMarkerKeys
+    .map((key) => itemHeights[key])
+    .reduce((sum, height) => sum + height, 0);
+
+  // NOTE: This assumes every element in a row is the same height
+  return (
+    PADDING_SIZE + // Top Padding
+    GAP_SIZE * precedingRowCount + // Gap after each row
+    totalPrecedingRowHeight + // Total height of the preceding rows
+    currentItemHeight / 2 //  Distance to center of dragged item
+  );
+};
+
 const shouldSwap = (
   index: number,
   indexToKey: string[],
