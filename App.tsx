@@ -2,7 +2,6 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Animated, {
   interpolate,
-  interpolateColor,
   type SharedValue,
   useAnimatedStyle,
   useDerivedValue,
@@ -74,7 +73,7 @@ export default function Flex() {
                       markerKey={getMarkerKey(country)}
                       label={city}
                       width={getItemWidth(cities.length)}
-                      activeItemPosition={activeItemOffset}
+                      activeItemOffset={activeItemOffset}
                     />
                   ))}
                 </>
@@ -91,27 +90,14 @@ type ItemProps = {
   label: string;
   width: number;
   markerKey: string;
-  activeItemPosition: SharedValue<Vector>;
+  activeItemOffset: SharedValue<Vector>;
 };
 
-function Item({ label, markerKey, width, activeItemPosition }: ItemProps) {
-  const {
-    activeItemKey,
-    activationState,
-    itemKey,
-    prevActiveItemKey,
-    activationAnimationProgress,
-  } = useItemContext();
+function Item({ label, markerKey, width, activeItemOffset }: ItemProps) {
+  const { activeItemKey, activationState, prevActiveItemKey } =
+    useItemContext();
 
-  const {
-    activationAnimationDuration,
-    activeItemOpacity,
-    activeItemScale,
-    activeItemShadowOpacity,
-    inactiveItemOpacity,
-    inactiveItemScale,
-    inactiveAnimationProgress,
-  } = useCommonValuesContext();
+  const { activeAnimationProgress } = useCommonValuesContext();
 
   const markerActivationState = useDerivedValue<DragActivationState>(() => {
     const currentActiveItemKey = activeItemKey.get();
@@ -137,33 +123,9 @@ function Item({ label, markerKey, width, activeItemPosition }: ItemProps) {
     );
   });
 
-  const markerOpacity = useDerivedValue(() => {
-    if (isMarkerActive.get() || isMarkerPreviouslyActive.get()) {
-      return activeItemOpacity.get();
-    }
-
-    return inactiveItemOpacity.get();
-  });
-
-  const markerScale = useDerivedValue(() => {
-    if (isMarkerActive.get() || isMarkerPreviouslyActive.get()) {
-      return activeItemScale.get();
-    }
-
-    return inactiveItemScale.get();
-  });
-
-  const markerShadowOpacity = useDerivedValue(() => {
-    if (isMarkerActive.get() || isMarkerPreviouslyActive.get()) {
-      return activeItemShadowOpacity.get();
-    }
-
-    return 0;
-  });
-
   const markerAnimationProgress = useDerivedValue(() => {
     if (isMarkerActive.get() || isMarkerPreviouslyActive.get()) {
-      return inactiveAnimationProgress.get();
+      return activeAnimationProgress.get();
     }
 
     return 0;
@@ -171,7 +133,7 @@ function Item({ label, markerKey, width, activeItemPosition }: ItemProps) {
 
   const markerOffset = useDerivedValue(() => {
     if (isMarkerActive.get() || isMarkerPreviouslyActive.get()) {
-      return activeItemPosition.get();
+      return activeItemOffset.get();
     }
 
     return { x: 0, y: 0 };
@@ -179,25 +141,10 @@ function Item({ label, markerKey, width, activeItemPosition }: ItemProps) {
 
   const animatedStyle = useAnimatedStyle(() => {
     const progress = markerAnimationProgress.get();
-    const opacityValue = interpolate(
-      progress,
-      [0, 1],
-      [1, markerOpacity.get()],
-    );
-
     const currentMarkerOffset = markerOffset.get();
 
     return {
-      shadowColor: interpolateColor(
-        markerShadowOpacity.get(),
-        [0, 1],
-        ["transparent", "black"],
-      ),
-      opacity: opacityValue,
       transform: [
-        {
-          scale: interpolate(progress, [0, 1], [1, markerScale.get()]),
-        },
         {
           translateX: interpolate(progress, [0, 1], [0, currentMarkerOffset.x]),
         },

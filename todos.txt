@@ -1,5 +1,6 @@
+- Figure out item position drift
 - Do not allow dragged row to move horizontally
-- Get dragged row to swap with other rows
+o Get dragged row to swap with other rows
 - Get items to animate to their position on drop
 - Figure out why I can't change opacity of non-active items
 X Figure out how to share active item position
@@ -9,7 +10,7 @@ X Create Row component and try to pass marker activation info to child items
 X Calculate item width during the render based on row size
 X Move todos from .md to .txt
 - Prevent new items in full rows
-- Reorder rows when dragging marker
+x Reorder rows when dragging marker
 - Destroy old marker on group
 - Insert new marker on ungroup
 - Move item into group

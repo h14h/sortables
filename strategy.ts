@@ -4,7 +4,6 @@ import {
   type SortStrategyFactory,
   useCommonValuesContext,
 } from "react-native-sortables";
-import type { Vector } from "react-native-sortables/dist/typescript/types";
 
 type OffsetX = number;
 type OffsetY = number;
