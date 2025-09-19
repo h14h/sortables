@@ -1,8 +1,10 @@
 import { Dimensions } from "react-native";
+import type { SharedValue } from "react-native-reanimated";
 import {
   type SortStrategyFactory,
   useCommonValuesContext,
 } from "react-native-sortables";
+import type { Vector } from "react-native-sortables/dist/typescript/types";
 
 type OffsetX = number;
 type OffsetY = number;
@@ -30,59 +32,66 @@ type Direction = {
   y: DirectionY;
 };
 
-export const customFlexStrategy: SortStrategyFactory = () => {
-  const { indexToKey, itemHeights, itemWidths } = useCommonValuesContext();
+export const useCustomFlexStrategy: (
+  activeItemOffset: SharedValue<Offset>,
+) => SortStrategyFactory = (activeItemOffset) => {
+  return () => {
+    // biome-ignore lint/correctness/useHookAtTopLevel: Needed for higher order function
+    const { indexToKey, itemHeights, itemWidths } = useCommonValuesContext();
 
-  return ({ activeIndex, activeKey, position }) => {
-    "worklet";
+    return ({ activeIndex, activeKey, position }) => {
+      "worklet";
 
-    const currentIndexToKey = indexToKey.get();
-    const currentItemWidths = itemWidths.get();
-    const currentItemHeights = itemHeights.get();
+      const currentIndexToKey = indexToKey.get();
+      const currentItemWidths = itemWidths.get();
+      const currentItemHeights = itemHeights.get();
 
-    if (!currentItemWidths) return currentIndexToKey;
-    if (typeof currentItemWidths === "number") return currentIndexToKey;
+      if (!currentItemWidths) return currentIndexToKey;
+      if (typeof currentItemWidths === "number") return currentIndexToKey;
 
-    if (!currentItemHeights) return currentIndexToKey;
-    if (typeof currentItemHeights === "number") return currentIndexToKey;
+      if (!currentItemHeights) return currentIndexToKey;
+      if (typeof currentItemHeights === "number") return currentIndexToKey;
 
-    const originX = getOriginX(
-      activeKey,
-      activeIndex,
-      currentIndexToKey,
-      currentItemWidths,
-    );
-
-    const originY = getOriginY(
-      activeIndex,
-      currentIndexToKey,
-      currentItemHeights,
-    );
-
-    const offset: Offset = {
-      x: position.x - originX,
-      y: position.y - originY,
-    };
-
-    const direction: Direction = {
-      x: offset.x >= 0 ? RIGHT : LEFT,
-      y: offset.y >= 0 ? DOWN : UP,
-    };
-
-    if (
-      isItem(activeKey) &&
-      shouldSwap(
+      const originX = getOriginX(
+        activeKey,
         activeIndex,
         currentIndexToKey,
         currentItemWidths,
-        offset.x,
-        direction.x,
-      )
-    ) {
-      return getSwapped(activeIndex, currentIndexToKey, direction.x);
-    }
+      );
 
-    return currentIndexToKey;
+      const originY = getOriginY(
+        activeIndex,
+        currentIndexToKey,
+        currentItemHeights,
+      );
+
+      const offset: Offset = {
+        x: position.x - originX,
+        y: position.y - originY,
+      };
+
+      activeItemOffset.set(offset);
+
+      const direction: Direction = {
+        x: offset.x >= 0 ? RIGHT : LEFT,
+        y: offset.y >= 0 ? DOWN : UP,
+      };
+
+      if (
+        isItem(activeKey) &&
+        shouldSwap(
+          activeIndex,
+          currentIndexToKey,
+          currentItemWidths,
+          offset.x,
+          direction.x,
+        )
+      ) {
+        return getSwapped(activeIndex, currentIndexToKey, direction.x);
+      }
+
+      return currentIndexToKey;
+    };
   };
 };
 
@@ -113,7 +122,7 @@ export const getItemWidth = (itemCount: number) => {
 const MARKER_PREFIX = ".$";
 const ITEM_PREFIX = ".1:$";
 
-const isMarker = (key: string) => {
+export const isMarker = (key: string) => {
   "worklet";
   return key.startsWith(MARKER_PREFIX);
 };
@@ -121,6 +130,15 @@ const isMarker = (key: string) => {
 const isItem = (key: string) => {
   "worklet";
   return key.startsWith(ITEM_PREFIX);
+};
+
+export const getMarkerKey = (markerID: string) => markerID;
+export const getItemKey = (markerID: string, itemID: string) =>
+  `${getMarkerKey(markerID)}:${itemID}`;
+
+export const isItemMarker = (itemKey: string, markerKey: string) => {
+  "worklet";
+  return isMarker(itemKey) && itemKey.includes(markerKey);
 };
 
 const getSiblingKeys = (
@@ -149,7 +167,7 @@ const getOriginX = (
 ): number => {
   "worklet";
 
-  if (isMarker(itemKey)) return PADDING_SIZE; // Left Padding
+  if (isMarker(itemKey)) return PADDING_SIZE + MARKER_WIDTH / 2;
 
   const currentItemWidth = itemWidths[itemKey];
 

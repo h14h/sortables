@@ -7,6 +7,7 @@ The goal is to support the following:
 
 - [x] Reordering items within their row (1pt)
 - [ ] Reordering entire rows at once (2pt)
+  - [x] Share active position across items (+1pt)
 - [ ] Removing items from a row into a new row (2pt)
 - [ ] Moving standalone items into an "open" row (3pt)
 

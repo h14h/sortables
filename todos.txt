@@ -1,3 +1,10 @@
+- Do not allow dragged row to move horizontally
+- Get dragged row to swap with other rows
+- Get items to animate to their position on drop
+- Figure out why I can't change opacity of non-active items
+X Figure out how to share active item position
+- Submit bug report for activationAnimationProgress
+X Create Row component and try to pass marker activation info to child items
 - Ensure item width animates during entering/exiting row
 X Calculate item width during the render based on row size
 X Move todos from .md to .txt
@@ -19,6 +26,6 @@ x Get item width on every render
 X Estimate how long it will take me to finish implementing this thing
 x Get a sense of how long it takes me to implement some unit of work
 X List discrete features to implement
-o Drag multiple items at once
+X Drag multiple items at once
 X Set up todo tracking
 X Add markers and items
