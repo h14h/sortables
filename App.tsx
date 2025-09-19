@@ -20,7 +20,7 @@ import {
   getItemKey,
   getItemWidth,
   getMarkerKey,
-  isItemMarker,
+  isMarkerForItem,
   MARKER_WIDTH,
   useCustomFlexStrategy,
 } from "./strategy";
@@ -63,6 +63,7 @@ export default function Flex() {
               width="fill"
               strategy={customFlexStrategy}
               onDragEnd={() => activeItemOffset.set(zeroOffset)}
+              activeItemOpacity={0.8}
             >
               {DATA.map(([country, cities]) => (
                 <>
@@ -70,7 +71,7 @@ export default function Flex() {
                   {cities.map((city) => (
                     <Item
                       key={getItemKey(city, country)}
-                      markerKey={getMarkerKey(country)}
+                      markerID={country}
                       label={city}
                       width={getItemWidth(cities.length)}
                       activeItemOffset={activeItemOffset}
@@ -89,11 +90,11 @@ export default function Flex() {
 type ItemProps = {
   label: string;
   width: number;
-  markerKey: string;
+  markerID: string;
   activeItemOffset: SharedValue<Vector>;
 };
 
-function Item({ label, markerKey, width, activeItemOffset }: ItemProps) {
+function Item({ label, markerID, width, activeItemOffset }: ItemProps) {
   const { activeItemKey, activationState, prevActiveItemKey } =
     useItemContext();
 
@@ -102,9 +103,9 @@ function Item({ label, markerKey, width, activeItemOffset }: ItemProps) {
   const markerActivationState = useDerivedValue<DragActivationState>(() => {
     const currentActiveItemKey = activeItemKey.get();
 
-    return markerKey &&
+    return markerID &&
       currentActiveItemKey !== null &&
-      isItemMarker(currentActiveItemKey, markerKey)
+      isMarkerForItem(currentActiveItemKey, markerID)
       ? activationState.value
       : DragActivationState.INACTIVE;
   });
@@ -117,9 +118,9 @@ function Item({ label, markerKey, width, activeItemOffset }: ItemProps) {
     const currentPrevActiveItemKey = prevActiveItemKey.get();
 
     return (
-      !!markerKey &&
+      !!markerID &&
       currentPrevActiveItemKey !== null &&
-      isItemMarker(currentPrevActiveItemKey, markerKey)
+      isMarkerForItem(currentPrevActiveItemKey, markerID)
     );
   });
 

@@ -1,6 +1,8 @@
+- Fix jumpy row swap animations
+- Ensure reliability of key substring logic
 - Figure out item position drift
 - Do not allow dragged row to move horizontally
-o Get dragged row to swap with other rows
+X Get dragged row to swap with other rows
 - Get items to animate to their position on drop
 - Figure out why I can't change opacity of non-active items
 X Figure out how to share active item position
@@ -13,7 +15,7 @@ X Move todos from .md to .txt
 x Reorder rows when dragging marker
 - Destroy old marker on group
 - Insert new marker on ungroup
-- Move item into group
+o Move item into group
 X Implement calculation for Y offset
 X Create PR to remove extraneous log in sortables library
 X Bump sortables package version for bugfix
