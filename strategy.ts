@@ -4,6 +4,7 @@ import {
   type SortStrategyFactory,
   useCommonValuesContext,
 } from "react-native-sortables";
+import { scheduleOnRN } from "react-native-worklets";
 
 type OffsetX = number;
 type OffsetY = number;
@@ -31,13 +32,31 @@ type Direction = {
   y: DirectionY;
 };
 
-export const useCustomFlexStrategy: (
-  activeItemOffset: SharedValue<Offset>,
-) => SortStrategyFactory = (activeItemOffset) => {
+type DragOutHandlerArgs = {
+  markerID: string;
+  elementID: string;
+  rowIndex: number;
+  direction: DirectionY;
+};
+
+type CustomFlexStrategyArgs = {
+  activeItemOffset: SharedValue<Offset>;
+  onDragOut: (args: DragOutHandlerArgs) => void;
+};
+
+type CustomFlexStrategyFactoryFactory = (
+  args: CustomFlexStrategyArgs,
+) => SortStrategyFactory;
+
+export const useCustomFlexStrategy: CustomFlexStrategyFactoryFactory = ({
+  activeItemOffset,
+  onDragOut,
+}) => {
   return () => {
-    const { indexToKey, keyToIndex, itemHeights, itemWidths } =
-      // biome-ignore lint/correctness/useHookAtTopLevel: Needed for higher order function
-      useCommonValuesContext();
+    // biome-ignore lint/correctness/useHookAtTopLevel: Needed for higher order function
+    const commonValues = useCommonValuesContext();
+
+    const { indexToKey, keyToIndex, itemHeights, itemWidths } = commonValues;
 
     return ({ activeIndex, activeKey, position }) => {
       "worklet";
@@ -80,8 +99,8 @@ export const useCustomFlexStrategy: (
       };
 
       if (
-        isItem(activeKey) &&
-        shouldSwapItem(
+        isElement(activeKey) &&
+        shouldSwapElement(
           activeIndex,
           currentIndexToKey,
           currentKeyToIndex,
@@ -90,7 +109,50 @@ export const useCustomFlexStrategy: (
           direction.x,
         )
       ) {
-        return getSwappedItem(activeIndex, currentIndexToKey, direction.x);
+        return getSwappedElement(activeIndex, currentIndexToKey, direction.x);
+      }
+
+      if (
+        isElement(activeKey) &&
+        shouldExitRow(
+          activeIndex,
+          currentIndexToKey,
+          currentKeyToIndex,
+          currentItemHeights,
+          offset.y,
+          direction.y,
+        )
+      ) {
+        const markers = currentIndexToKey.filter(isMarker);
+        const adjacentMarkerIndex = getAdjacentMarkerIndex(
+          activeIndex,
+          currentIndexToKey,
+          direction.y,
+        );
+
+        console.log("Adjacent marker index", adjacentMarkerIndex);
+
+        const elementKey = currentIndexToKey[activeIndex];
+        const markerKey = currentIndexToKey[adjacentMarkerIndex];
+        const rowIndex = markers.indexOf(markerKey);
+
+        const markerID = getMarkerID(markerKey);
+        const elementID = getElementID(elementKey);
+
+        scheduleOnRN(onDragOut, {
+          markerID,
+          elementID,
+          rowIndex,
+          direction: direction.y,
+        });
+
+        const withNewRow = moveElement(
+          activeIndex,
+          currentIndexToKey,
+          direction.y,
+        );
+
+        return withNewRow;
       }
 
       if (
@@ -122,53 +184,103 @@ export const GAP_SIZE = 12;
 export const PADDING_SIZE = GAP_SIZE;
 export const MARKER_WIDTH = GAP_SIZE * 3;
 
-const MAX_ITEMS = 3;
-export const getItemWidth = (itemCount: number) => {
-  if (itemCount < 0) console.error("There cannot be negative Items in a Row");
+const MAX_ELEMENTS = 3;
+export const getElementWidth = (elementCount: number) => {
+  if (elementCount < 0)
+    console.error("There cannot be negative Elements in a Row");
 
-  if (itemCount === 0)
-    console.error("There must be at least one Item in a Row");
+  if (elementCount === 0)
+    console.error("There must be at least one Element in a Row");
 
-  if (itemCount > MAX_ITEMS)
-    console.error(`There cannot be more than ${MAX_ITEMS} in a Row`);
+  if (elementCount > MAX_ELEMENTS)
+    console.error(`There cannot be more than ${MAX_ELEMENTS} in a Row`);
 
   return (
     (Dimensions.get("window").width -
       MARKER_WIDTH -
       PADDING_SIZE * 2 -
-      GAP_SIZE * itemCount) /
-    itemCount
+      GAP_SIZE * elementCount) /
+    elementCount
   );
 };
 
 const MARKER_PREFIX = ".$";
-const ITEM_PREFIX = ".1:$";
+const ELEMENT_PREFIX = ".1:$";
 
 export const isMarker = (key: string) => {
   "worklet";
   return key.startsWith(MARKER_PREFIX);
 };
 
-const isItem = (key: string) => {
+const isElement = (key: string) => {
   "worklet";
-  return key.startsWith(ITEM_PREFIX);
+  return key.startsWith(ELEMENT_PREFIX);
 };
+
+const CHILD_SEPARATOR = "_";
 
 export const getMarkerKey = (markerID: string) => markerID;
-export const getItemKey = (itemID: string, markerID: string) =>
-  `${getMarkerKey(markerID)}:${itemID}`;
+export const getElementKey = (elementID: string, markerID: string) =>
+  getMarkerKey(markerID) + CHILD_SEPARATOR + elementID;
 
-export const isMarkerForItem = (markerKey: string, markerID: string) => {
+const getMarkerID = (markerInternalKey: string) => {
   "worklet";
-  return isMarker(markerKey) && markerKey.includes(markerID);
+
+  const [_reactPrefix, markerExternalKey] = markerInternalKey.split("$");
+
+  return markerExternalKey;
 };
 
-export const isItemOfMarker = (itemKey: string, markerKey: string) => {
+const getElementID = (elementInternalKey: string) => {
   "worklet";
-  return isItem(itemKey) && itemKey.includes(markerKey.substring(2));
+
+  const [_reactPrefix, elementExternalKey] = elementInternalKey.split("$");
+  const [_markerID, elementID] = elementExternalKey.split(CHILD_SEPARATOR);
+
+  return elementID;
 };
 
-const getSiblingItemKeys = (index: number, indexToKey: string[]) => {
+export const isMarkerForElement = (
+  internalMarkerKey: string,
+  markerID: string,
+) => {
+  "worklet";
+  return (
+    isMarker(internalMarkerKey) &&
+    internalMarkerKey === MARKER_PREFIX + markerID
+  );
+};
+
+export const isElementOfMarker = (
+  internalElementKey: string,
+  internalMarkerKey: string,
+) => {
+  "worklet";
+  const elementID = getElementID(internalElementKey);
+  const markerID = getMarkerID(internalMarkerKey);
+
+  return (
+    isElement(internalElementKey) &&
+    internalElementKey ===
+      ELEMENT_PREFIX + markerID + CHILD_SEPARATOR + elementID
+  );
+};
+
+const getAdjacentMarkerIndex = (
+  itemIndex: number,
+  indexToKey: string[],
+  direction: DirectionX | DirectionY,
+) => {
+  "worklet";
+  const isBounded = (i: number) => i >= 0 && i < indexToKey.length;
+  for (let i = itemIndex + direction; isBounded(i); i += direction) {
+    if (isMarker(indexToKey[i])) return i;
+  }
+
+  return -1; // TODO: Should never happen
+};
+
+const getSiblingElementKeys = (index: number, indexToKey: string[]) => {
   "worklet";
 
   const siblings = [];
@@ -217,19 +329,19 @@ const getOriginX = (
 
   if (isMarker(itemKey)) return PADDING_SIZE + MARKER_WIDTH / 2;
 
-  const currentItemWidth = itemWidths[itemKey];
+  const currentElementWidth = itemWidths[itemKey];
 
-  const siblingItemKeys = getSiblingItemKeys(itemIndex, indexToKey);
-  const prevSiblingItemKeys = siblingItemKeys.filter(
+  const siblingElementKeys = getSiblingElementKeys(itemIndex, indexToKey);
+  const prevSiblingElementKeys = siblingElementKeys.filter(
     (key) => keyToIndex[key] < itemIndex,
   );
 
-  const prevSiblingItemKeysCount = prevSiblingItemKeys.length;
-  const prevSiblingItemKeysWidths = prevSiblingItemKeys.map(
+  const prevSiblingElementKeysCount = prevSiblingElementKeys.length;
+  const prevSiblingElementKeysWidths = prevSiblingElementKeys.map(
     (key) => itemWidths[key],
   );
 
-  const prevSiblingItemsWidth = prevSiblingItemKeysWidths.reduce(
+  const prevSiblingElementTotalWidth = prevSiblingElementKeysWidths.reduce(
     (sum, width) => sum + width,
     0,
   );
@@ -238,9 +350,9 @@ const getOriginX = (
     PADDING_SIZE + // Left Padding
     MARKER_WIDTH + // Width of row marker
     GAP_SIZE + // Gap after row marker
-    GAP_SIZE * prevSiblingItemKeysCount + // Gap after each left sibling
-    prevSiblingItemsWidth + // Total width of the left siblings
-    currentItemWidth / 2 // Distance to center of dragged item
+    GAP_SIZE * prevSiblingElementKeysCount + // Gap after each left sibling
+    prevSiblingElementTotalWidth + // Total width of the left siblings
+    currentElementWidth / 2 // Distance to center of dragged element
   );
 };
 
@@ -272,8 +384,8 @@ const getOriginY = (
   );
 };
 
-const shouldSwapItem = (
-  itemIndex: number,
+const shouldSwapElement = (
+  elementIndex: number,
   indexToKey: string[],
   keyToIndex: Record<string, number>,
   itemWidths: Record<string, number>,
@@ -282,23 +394,23 @@ const shouldSwapItem = (
 ): boolean => {
   "worklet";
 
-  const siblingWidth = itemWidths[indexToKey[itemIndex + direction]];
+  const siblingWidth = itemWidths[indexToKey[elementIndex + direction]];
   const swapThreshold = GAP_SIZE + siblingWidth;
 
   const isPastThreshold = Math.abs(offsetX) > swapThreshold;
   if (!isPastThreshold) return false;
 
-  const siblingItemKeys = getSiblingItemKeys(itemIndex, indexToKey);
-  const leftSiblingItemKeys = siblingItemKeys.filter(
-    (key) => keyToIndex[key] < itemIndex,
+  const siblingElementKeys = getSiblingElementKeys(elementIndex, indexToKey);
+  const leftSiblingElementKeys = siblingElementKeys.filter(
+    (key) => keyToIndex[key] < elementIndex,
   );
-  const rightSiblingItemKeys = siblingItemKeys.filter(
-    (key) => keyToIndex[key] > itemIndex,
+  const rightSiblingElementKeys = siblingElementKeys.filter(
+    (key) => keyToIndex[key] > elementIndex,
   );
 
   return (
-    (direction === LEFT && leftSiblingItemKeys.length > 0) ||
-    (direction === RIGHT && rightSiblingItemKeys.length > 0)
+    (direction === LEFT && leftSiblingElementKeys.length > 0) ||
+    (direction === RIGHT && rightSiblingElementKeys.length > 0)
   );
 };
 
@@ -312,8 +424,8 @@ const shouldSwapRow = (
 ): boolean => {
   "worklet";
 
-  const siblingHeight = itemHeights[indexToKey[markerIndex + direction]];
-  const swapThreshold = GAP_SIZE + siblingHeight;
+  const markerHeight = itemHeights[indexToKey[markerIndex]];
+  const swapThreshold = GAP_SIZE + markerHeight;
 
   const isPastThreshold = Math.abs(offsetY) > swapThreshold;
   if (!isPastThreshold) return false;
@@ -335,7 +447,7 @@ const shouldSwapRow = (
   return true;
 };
 
-const getSwappedItem = (
+const getSwappedElement = (
   index: number,
   indexToKey: string[],
   direction: DirectionX,
@@ -355,7 +467,7 @@ const getRowForMarker = (markerIndex: number, indexToKey: string[]) => {
 
   const markerKey = indexToKey[markerIndex];
   return indexToKey.filter(
-    (key) => key === markerKey || isItemOfMarker(key, markerKey),
+    (key) => key === markerKey || isElementOfMarker(key, markerKey),
   );
 };
 
@@ -402,3 +514,85 @@ const getSwappedRow = (
 
   return newIndexToKey;
 };
+
+const shouldExitRow = (
+  elementIndex: number,
+  indexToKey: string[],
+  keyToIndex: Record<string, number>,
+  itemHeights: Record<string, number>,
+  offsetY: OffsetY,
+  direction: DirectionY,
+): boolean => {
+  "worklet";
+
+  const itemHeight = itemHeights[indexToKey[elementIndex]];
+  const swapThreshold = itemHeight / 2;
+
+  const isPastThreshold = Math.abs(offsetY) > swapThreshold;
+  if (!isPastThreshold) return false;
+
+  const markerIndex = (() => {
+    for (let i = elementIndex - 1; i >= 0; i--) {
+      if (isMarker(indexToKey[i])) return i;
+    }
+
+    return -1; // TODO: Should never happen
+  })();
+
+  const siblingMarkerKeys = getSiblingMarkerKeys(markerIndex, indexToKey);
+
+  const upSiblingMarkerKeys = siblingMarkerKeys.filter(
+    (key) => keyToIndex[key] < markerIndex,
+  );
+
+  if (direction === UP && upSiblingMarkerKeys.length === 0) return false;
+
+  const downSiblingMarkerKeys = siblingMarkerKeys.filter(
+    (key) => keyToIndex[key] > markerIndex,
+  );
+
+  if (direction === DOWN && downSiblingMarkerKeys.length === 0) return false;
+
+  return true;
+};
+
+function moveElement(
+  activeIndex: number,
+  currentIndexToKey: string[],
+  direction: DirectionY,
+) {
+  "worklet";
+  const newIndexToKey = [...currentIndexToKey];
+
+  const prevMarkerIndex = (() => {
+    for (let i = activeIndex - 1; i >= 0; i--) {
+      if (isMarker(currentIndexToKey[i])) return i;
+    }
+
+    return -1; // TODO: Should never happen
+  })();
+
+  const nextMarkerIndex = (() => {
+    for (let i = activeIndex + 1; i < currentIndexToKey.length; i++) {
+      if (isMarker(currentIndexToKey[i])) return i;
+    }
+
+    return -1; // TODO: Should never happen
+  })();
+
+  if (direction === UP) {
+    newIndexToKey.splice(activeIndex, 1);
+    newIndexToKey.splice(prevMarkerIndex, 0, currentIndexToKey[activeIndex]);
+  }
+
+  if (direction === DOWN) {
+    newIndexToKey.splice(
+      nextMarkerIndex - 1,
+      0,
+      currentIndexToKey[activeIndex],
+    );
+    newIndexToKey.splice(activeIndex, 1);
+  }
+
+  return newIndexToKey;
+}

@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Animated, {
@@ -17,36 +18,176 @@ import type { Vector } from "react-native-sortables/dist/typescript/types";
 import {
   ELEMENT_HEIGHT,
   GAP_SIZE,
-  getItemKey,
-  getItemWidth,
+  getElementKey,
+  getElementWidth,
   getMarkerKey,
-  isMarkerForItem,
+  isMarkerForElement,
   MARKER_WIDTH,
   useCustomFlexStrategy,
 } from "./strategy";
 
-const DATA: [string, string[]][] = [
-  ["🇺🇸", ["New York", "Los Angeles", "Chicago"]],
-  ["🇫🇷", ["Paris", "Nice"]],
-  ["🇯🇵", ["Tokyo"]],
-  ["🇬🇧", ["London", "Manchester", "Birmingham"]],
-  ["🇩🇪", ["Berlin", "Munich"]],
-  ["🇮🇹", ["Rome"]],
-  ["🇪🇸", ["Madrid", "Barcelona"]],
-  ["🇨🇦", ["Toronto", "Vancouver", "Montreal"]],
-  ["🇦🇺", ["Sydney", "Melbourne", "Brisbane"]],
-  ["🇧🇷", ["São Paulo", "Salvador"]],
-  ["🇲🇽", ["Mexico City"]],
-  ["🇮🇳", ["Mumbai", "Delhi"]],
-  ["🇰🇷", ["Seoul", "Busan", "Incheon"]],
-  ["🇳🇱", ["Amsterdam"]],
-  ["🇸🇪", ["Stockholm", "Gothenburg"]],
+export class Country {
+  private static nextId = 1;
+  public readonly id: null | string;
+  public cities: City[] = [];
+
+  constructor(
+    public name: string,
+    public pendingID?: string,
+  ) {
+    if (pendingID) {
+      this.id = null;
+    } else {
+      this.id = Country.nextId.toString();
+      Country.nextId++;
+    }
+  }
+
+  addCity(city: City) {
+    this.cities.push(city);
+  }
+
+  addAndCreateCity(cityName: string) {
+    this.cities.push(new City(cityName));
+  }
+
+  addAndCreateCities(cityNames: string[]) {
+    this.cities.push(...cityNames.map((name) => new City(name)));
+  }
+
+  dropCity(cityId: string) {
+    const cityIndex = this.cities.findIndex((city) => city.id === cityId);
+    if (cityIndex === -1) return null;
+
+    const city = this.cities[cityIndex];
+    this.cities.splice(cityIndex, 1);
+    return city;
+  }
+
+  getID() {
+    return this.id
+      ? this.id.toString()
+      : this.pendingID
+        ? `PENDING_${this.pendingID}`
+        : "NULL";
+  }
+}
+
+export class City {
+  private static nextId = 1;
+  public readonly id: string;
+
+  constructor(public name: string) {
+    City.nextId++;
+    this.id = City.nextId.toString();
+  }
+}
+
+const usa = new Country("🇺🇸");
+usa.addAndCreateCities(["New York", "Los Angeles", "Chicago"]);
+
+const france = new Country("🇫🇷");
+france.addAndCreateCities(["Paris", "Nice"]);
+
+const japan = new Country("🇯🇵");
+japan.addAndCreateCity("Tokyo");
+
+const uk = new Country("🇬🇧");
+uk.addAndCreateCities(["London", "Manchester", "Birmingham"]);
+
+const germany = new Country("🇩🇪");
+germany.addAndCreateCities(["Berlin", "Munich"]);
+
+const italy = new Country("🇮🇹");
+italy.addAndCreateCity("Rome");
+
+const spain = new Country("🇪🇸");
+spain.addAndCreateCities(["Madrid", "Barcelona"]);
+
+const canada = new Country("🇨🇦");
+canada.addAndCreateCities(["Toronto", "Vancouver", "Montreal"]);
+
+const australia = new Country("🇦🇺");
+australia.addAndCreateCities(["Sydney", "Melbourne", "Brisbane"]);
+
+const brazil = new Country("🇧🇷");
+brazil.addAndCreateCities(["São Paulo", "Salvador"]);
+
+const mexico = new Country("🇲🇽");
+mexico.addAndCreateCity("Mexico City");
+
+const india = new Country("🇮🇳");
+india.addAndCreateCities(["Mumbai", "Delhi"]);
+
+const southKorea = new Country("🇰🇷");
+southKorea.addAndCreateCities(["Seoul", "Busan", "Incheon"]);
+
+const netherlands = new Country("🇳🇱");
+netherlands.addAndCreateCity("Amsterdam");
+
+const sweden = new Country("🇸🇪");
+sweden.addAndCreateCities(["Stockholm", "Gothenburg"]);
+
+const DATA = [
+  usa,
+  france,
+  japan,
+  uk,
+  germany,
+  italy,
+  spain,
+  canada,
+  australia,
+  brazil,
+  mexico,
+  india,
+  southKorea,
+  netherlands,
+  sweden,
 ];
 
 export default function Flex() {
+  const [countries, setCountries] = useState(DATA);
+
   const zeroOffset = { x: 0, y: 0 };
   const activeItemOffset = useSharedValue(zeroOffset);
-  const customFlexStrategy = useCustomFlexStrategy(activeItemOffset);
+
+  const newCountryID = useRef(0);
+  const prevCountryID = useRef<string | null>(null);
+
+  const customFlexStrategy = useCustomFlexStrategy({
+    activeItemOffset,
+    onDragOut: ({ markerID, elementID, rowIndex, direction }) => {
+      const prevCountry = countries[rowIndex];
+
+      const newCountry = new Country(
+        prevCountry.name,
+        newCountryID.current.toString(),
+      );
+
+      newCountryID.current = newCountryID.current + 1;
+
+      const targetIndex = rowIndex + direction;
+
+      if (markerID !== prevCountryID.current) {
+        setCountries((countries) => {
+          const city = prevCountry.dropCity(elementID);
+
+          if (city === null) return countries;
+
+          newCountry.addCity(city);
+
+          return [
+            ...countries.slice(0, targetIndex),
+            newCountry,
+            ...countries.slice(targetIndex),
+          ];
+        });
+      }
+
+      prevCountryID.current = markerID;
+    },
+  });
 
   return (
     <SafeAreaProvider>
@@ -65,15 +206,19 @@ export default function Flex() {
               onDragEnd={() => activeItemOffset.set(zeroOffset)}
               activeItemOpacity={0.8}
             >
-              {DATA.map(([country, cities]) => (
+              {countries.map((country) => (
                 <>
-                  <Marker key={getMarkerKey(country)} label={country} />
-                  {cities.map((city) => (
+                  <Marker
+                    key={getMarkerKey(country.getID())}
+                    label={country.name}
+                  />
+                  {country.cities.map((city) => (
                     <Item
-                      key={getItemKey(city, country)}
-                      markerID={country}
-                      label={city}
-                      width={getItemWidth(cities.length)}
+                      key={getElementKey(city.id.toString(), country.getID())}
+                      markerID={country.getID()}
+                      markerLabel={country.name}
+                      label={city.name}
+                      width={getElementWidth(country.cities.length)}
                       activeItemOffset={activeItemOffset}
                     />
                   ))}
@@ -91,6 +236,7 @@ type ItemProps = {
   label: string;
   width: number;
   markerID: string;
+  markerLabel: string;
   activeItemOffset: SharedValue<Vector>;
 };
 
@@ -105,7 +251,7 @@ function Item({ label, markerID, width, activeItemOffset }: ItemProps) {
 
     return markerID &&
       currentActiveItemKey !== null &&
-      isMarkerForItem(currentActiveItemKey, markerID)
+      isMarkerForElement(currentActiveItemKey, markerID)
       ? activationState.value
       : DragActivationState.INACTIVE;
   });
@@ -120,7 +266,7 @@ function Item({ label, markerID, width, activeItemOffset }: ItemProps) {
     return (
       !!markerID &&
       currentPrevActiveItemKey !== null &&
-      isMarkerForItem(currentPrevActiveItemKey, markerID)
+      isMarkerForElement(currentPrevActiveItemKey, markerID)
     );
   });
 

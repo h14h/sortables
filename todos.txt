@@ -1,10 +1,12 @@
+- Prevent drag from cancelling on ungroup
+o Insert new marker on ungroup down
 - Fix jumpy row swap animations
-- Ensure reliability of key substring logic
+x Ensure reliability of key substring logic
 - Figure out item position drift
 - Do not allow dragged row to move horizontally
 X Get dragged row to swap with other rows
 - Get items to animate to their position on drop
-- Figure out why I can't change opacity of non-active items
+x Figure out why I can't change opacity of non-active items
 X Figure out how to share active item position
 - Submit bug report for activationAnimationProgress
 X Create Row component and try to pass marker activation info to child items
@@ -14,12 +16,12 @@ X Move todos from .md to .txt
 - Prevent new items in full rows
 x Reorder rows when dragging marker
 - Destroy old marker on group
-- Insert new marker on ungroup
-o Move item into group
+X Insert new marker on ungroup
+X Move item into group
 X Implement calculation for Y offset
 X Create PR to remove extraneous log in sortables library
 X Bump sortables package version for bugfix
-- Move item out of group
+X Move item out of group
 X Check in on scrolling drag conflict bug report
 X Fix counting bug with script/review-todos
 X Fix drag conflicts with scrolling
