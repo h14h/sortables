@@ -124,16 +124,15 @@ export const useCustomFlexStrategy: CustomFlexStrategyFactoryFactory = ({
         )
       ) {
         const markers = currentIndexToKey.filter(isMarker);
-        const adjacentMarkerIndex = getAdjacentMarkerIndex(
+        const elementMarkerIndex = getAdjacentMarkerIndex(
           activeIndex,
           currentIndexToKey,
-          direction.y,
+          LEFT,
         );
 
-        console.log("Adjacent marker index", adjacentMarkerIndex);
-
         const elementKey = currentIndexToKey[activeIndex];
-        const markerKey = currentIndexToKey[adjacentMarkerIndex];
+        const markerKey = currentIndexToKey[elementMarkerIndex];
+
         const rowIndex = markers.indexOf(markerKey);
 
         const markerID = getMarkerID(markerKey);
@@ -145,14 +144,6 @@ export const useCustomFlexStrategy: CustomFlexStrategyFactoryFactory = ({
           rowIndex,
           direction: direction.y,
         });
-
-        const withNewRow = moveElement(
-          activeIndex,
-          currentIndexToKey,
-          direction.y,
-        );
-
-        return withNewRow;
       }
 
       if (

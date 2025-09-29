@@ -153,11 +153,10 @@ export default function Flex() {
   const activeItemOffset = useSharedValue(zeroOffset);
 
   const newCountryID = useRef(0);
-  const prevCountryID = useRef<string | null>(null);
 
   const customFlexStrategy = useCustomFlexStrategy({
     activeItemOffset,
-    onDragOut: ({ markerID, elementID, rowIndex, direction }) => {
+    onDragOut: ({ elementID, rowIndex, direction }) => {
       const prevCountry = countries[rowIndex];
 
       const newCountry = new Country(
@@ -167,25 +166,22 @@ export default function Flex() {
 
       newCountryID.current = newCountryID.current + 1;
 
-      const targetIndex = rowIndex + direction;
+      // Insert new row at next index if moving down, current index if moving up
+      const targetIndex = direction === 1 ? rowIndex + 1 : rowIndex;
 
-      if (markerID !== prevCountryID.current) {
-        setCountries((countries) => {
-          const city = prevCountry.dropCity(elementID);
+      setCountries((countries) => {
+        const city = prevCountry.dropCity(elementID);
 
-          if (city === null) return countries;
+        if (city === null) return countries;
 
-          newCountry.addCity(city);
+        newCountry.addCity(city);
 
-          return [
-            ...countries.slice(0, targetIndex),
-            newCountry,
-            ...countries.slice(targetIndex),
-          ];
-        });
-      }
-
-      prevCountryID.current = markerID;
+        return [
+          ...countries.slice(0, targetIndex),
+          newCountry,
+          ...countries.slice(targetIndex),
+        ];
+      });
     },
   });
 

@@ -1,5 +1,7 @@
+o Ensure successive ungroups work
+X Ensure ungroup up targets the right row
 - Prevent drag from cancelling on ungroup
-o Insert new marker on ungroup down
+X Insert new marker on ungroup down
 - Fix jumpy row swap animations
 x Ensure reliability of key substring logic
 - Figure out item position drift
@@ -13,7 +15,7 @@ X Create Row component and try to pass marker activation info to child items
 - Ensure item width animates during entering/exiting row
 X Calculate item width during the render based on row size
 X Move todos from .md to .txt
-- Prevent new items in full rows
+o Prevent new items in full rows
 x Reorder rows when dragging marker
 - Destroy old marker on group
 X Insert new marker on ungroup
